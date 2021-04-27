@@ -3,10 +3,11 @@ import { useState } from 'react';
 import cn from 'classnames';
 import { getOffset } from 'rc-util/lib/Dom/css';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
-import { GetContainer } from 'rc-util/lib/PortalWrapper';
-import Preview, { PreviewProps } from './Preview';
+import type { GetContainer } from 'rc-util/lib/PortalWrapper';
+import type { PreviewProps } from './Preview';
+import Preview from './Preview';
 import PreviewGroup, { context } from './PreviewGroup';
-import { IDialogPropTypes } from 'rc-dialog/lib/IDialogPropTypes';
+import type { IDialogPropTypes } from 'rc-dialog/lib/IDialogPropTypes';
 
 export interface ImagePreviewType
   extends Omit<
@@ -35,6 +36,7 @@ export interface ImageProps
   placeholder?: React.ReactNode;
   fallback?: string;
   preview?: boolean | ImagePreviewType;
+  innerRef?: (HTMLImageElement) => void;
   /**
    * @deprecated since version 3.2.1
    */
@@ -61,6 +63,7 @@ const ImageInternal: CompoundedComponent<ImageProps> = ({
   height,
   style,
   preview = true,
+  innerRef,
   className,
   onClick,
   onError: onImageError,
@@ -159,6 +162,9 @@ const ImageInternal: CompoundedComponent<ImageProps> = ({
   };
 
   const getImgRef = (img?: HTMLImageElement) => {
+    if (innerRef) {
+      innerRef(img);
+    }
     isLoaded.current = false;
     if (status !== 'loading') return;
     if (img?.complete && (img.naturalWidth || img.naturalHeight)) {
