@@ -37,6 +37,7 @@ export interface ImageProps
   fallback?: string;
   preview?: boolean | ImagePreviewType;
   innerRef?: (HTMLImageElement) => void;
+  onLoad?: () => void;
   /**
    * @deprecated since version 3.2.1
    */
@@ -64,6 +65,7 @@ const ImageInternal: CompoundedComponent<ImageProps> = ({
   style,
   preview = true,
   innerRef,
+  onLoad: onImageLoaded,
   className,
   onClick,
   onError: onImageError,
@@ -117,6 +119,9 @@ const ImageInternal: CompoundedComponent<ImageProps> = ({
 
   const onLoad = () => {
     setStatus('normal');
+    if (onImageLoaded) {
+      onImageLoaded();
+    }
   };
 
   const onError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
