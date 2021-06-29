@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useState } from 'react';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
-import { ImagePreviewType } from './Image';
-import Preview, { PreviewProps } from './Preview';
+import type { ImagePreviewType } from './Image';
+import type { PreviewProps } from './Preview';
+import Preview from './Preview';
 
 export interface PreviewGroupPreview
   extends Omit<ImagePreviewType, 'icons' | 'mask' | 'maskClassName'> {
@@ -77,24 +78,27 @@ const Group: React.FC<GroupConsumerProps> = ({
       .map(([id, { url }]) => [id, url]),
   );
 
-  const registerImage = (id: number, url: string, canPreview: boolean = true) => {
-    const unRegister = () => {
+  const registerImage = React.useCallback(
+    (id: number, url: string, canPreview: boolean = true) => {
+      const unRegister = () => {
+        setPreviewUrls(oldPreviewUrls => {
+          const clonePreviewUrls = new Map(oldPreviewUrls);
+          const deleteResult = clonePreviewUrls.delete(id);
+          return deleteResult ? clonePreviewUrls : oldPreviewUrls;
+        });
+      };
+
       setPreviewUrls(oldPreviewUrls => {
-        const clonePreviewUrls = new Map(oldPreviewUrls);
-        const deleteResult = clonePreviewUrls.delete(id);
-        return deleteResult ? clonePreviewUrls : oldPreviewUrls;
+        return new Map(oldPreviewUrls).set(id, {
+          url,
+          canPreview,
+        });
       });
-    };
 
-    setPreviewUrls(oldPreviewUrls => {
-      return new Map(oldPreviewUrls).set(id, {
-        url,
-        canPreview,
-      });
-    });
-
-    return unRegister;
-  };
+      return unRegister;
+    },
+    [setPreviewUrls],
+  );
 
   const onPreviewClose = (e: React.SyntheticEvent<Element>) => {
     e.stopPropagation();
